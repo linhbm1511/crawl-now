@@ -8,7 +8,7 @@ fileSystem.createNewfile(fileName);
     // Mở trình duyệt mới và tới trang của kenh14
     const browser = await puppeteer.launch({ headless: false});
     const page = await browser.newPage();
-    await page.goto('https://www.now.vn/ha-noi/danh-sach-dia-diem-giao-tan-noi');
+    await page.goto(URL+'/ha-noi/danh-sach-dia-diem-giao-tan-noi');
     await page.waitFor(3000);
     // Chạy đoạn JavaScript trong hàm này, đưa kết quả vào biến article
     const articles = await page.evaluate(() => {
@@ -21,30 +21,23 @@ fileSystem.createNewfile(fileName);
         return articles;
     });
     const promises = [];
-        articles.forEach( (i) => {
-        // promises.push(async () => {
-            await page.goto(URL + articles[i].href, {
-            // Set timeout cho page
-                timeout: 3000000
-            });
-            // Chờ 2s sau khi page được load để tránh overload
-            await page.waitFor(2000);
-            // const form = await page.$('div.modal-footer>button');
-            // await form.evaluate( form => form.click() );
-            
-            let res = await page.evaluate(() => {
+        for (let art of articles) {
+            const page1 = await browser.newPage();
+            await page1.goto(URL + art.href, {timeout: 3000000});
+            await page1.waitFor(2000);
+            let res = await page1.evaluate(() => {
                 let dishes = document.querySelectorAll("div.item-restaurant-row>div");
-                // dishes = [...dishes];
-                dishes.forEach((dish) => {
-                    console.log(dish.innerText);
-                })
+                dishes = [...dishes]
+                // dishes.forEach((dish) => {
+                //     console.log(dish.innerText);
+                //     return dish.innerText;
+                // })
                 return dishes;
             });
-        
-            console.log('Page ID Spawned', res);
-            return res;
-        // })
-        })
+            console.log('Page ID Spawned', res[0].innerText);
+            await page1.goto('about:blank');
+            await page1.close();
+        }
     fileSystem.saveJsonObjectToFile(articles, fileName);
     // In ra kết quả và đóng trình duyệt
     console.log(articles);
