@@ -15,5 +15,5 @@ module.exports = {
             if (err) throw err;
             console.log(`Saved to file ${fileName}`);
         });
-    }
+    },
 }
